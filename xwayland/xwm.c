@@ -380,9 +380,13 @@ static void xwm_set_focus_window(struct wlr_xwm *xwm,
 	}
 
 	if (!xsurface) {
+		// XCB_POINTER_ROOT is described in xcb documentation but isn't
+		// actually defined in the headers. It's distinct from XCB_NONE
+		// (which disables keyboard input entirely and causes issues
+		// with keyboard grabs for e.g. popups).
 		xcb_set_input_focus_checked(xwm->xcb_conn,
 			XCB_INPUT_FOCUS_POINTER_ROOT,
-			XCB_NONE, XCB_CURRENT_TIME);
+			1L /*XCB_POINTER_ROOT*/, XCB_CURRENT_TIME);
 		return;
 	}
 
