@@ -1,3 +1,9 @@
+wlroots (0.17.2-ok1) nile; urgency=medium
+
+  * Update to upstream 0.17.2
+
+ -- Morose <chenlinxiang@kylinos.cn>  Fri, 12 Apr 2024 10:58:49 +0800
+
 wlroots (0.17.1-ok1) nile; urgency=medium
 
   * Update to upstream 0.17.1
