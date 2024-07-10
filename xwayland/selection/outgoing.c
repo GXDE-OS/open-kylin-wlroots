@@ -287,9 +287,9 @@ static bool xwm_selection_send_data(struct wlr_xwm_selection *selection,
 	}
 
 	fcntl(p[0], F_SETFD, FD_CLOEXEC);
-	fcntl(p[0], F_SETFL, O_NONBLOCK);
+	// fcntl(p[0], F_SETFL, O_NONBLOCK);
 	fcntl(p[1], F_SETFD, FD_CLOEXEC);
-	fcntl(p[1], F_SETFL, O_NONBLOCK);
+	// fcntl(p[1], F_SETFL, O_NONBLOCK);
 
 	transfer->wl_client_fd = p[0];
 

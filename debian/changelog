@@ -1,3 +1,9 @@
+wlroots (0.17.4-ok2) nile; urgency=medium
+
+  * Fix selection sync bug
+
+ -- Morose <chenlinxiang@kylinos.cn>  Wed, 10 Jul 2024 15:52:55 +0800
+
 wlroots (0.17.4-ok1) nile; urgency=medium
 
   * Update to upstream 0.17.4
