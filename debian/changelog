@@ -1,3 +1,10 @@
+wlroots (0.17.4-ok3) nile; urgency=medium
+
+  * vulkan: Fix draw rect clip region
+  * Revert "Fix selection sync bug"
+
+ -- Morose <chenlinxiang@kylinos.cn>  Thu, 01 Aug 2024 11:18:49 +0800
+
 wlroots (0.17.4-ok2) nile; urgency=medium
 
   * Fix selection sync bug
