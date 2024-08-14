@@ -1,3 +1,9 @@
+wlroots (0.17.4-ok4) nile; urgency=medium
+
+  * Fix some bugs about xwayland
+
+ -- Morose <chenlinxiang@kylinos.cn>  Wed, 14 Aug 2024 14:11:04 +0800
+
 wlroots (0.17.4-ok3) nile; urgency=medium
 
   * vulkan: Fix draw rect clip region
