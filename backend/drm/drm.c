@@ -1601,6 +1601,92 @@ static bool connect_drm_connector(struct wlr_drm_connector *wlr_conn,
 
 static void disconnect_drm_connector(struct wlr_drm_connector *conn);
 
+void update_drm_connector(struct wlr_drm_backend *drm, struct wlr_device_hotplug_event *event)
+{
+	if (event == NULL || event->connector_id ==0) {
+		return;
+	}
+
+	struct wlr_drm_connector *conn;
+	wl_list_for_each(conn, &drm->connectors, link) {
+		if ( event->connector_id != conn->id) {
+			continue;
+		}
+
+		drmModeConnector *drm_conn = drmModeGetConnector(drm->fd, conn->id);
+		if (!drm_conn) {
+			wlr_log_errno(WLR_ERROR, "Failed to get DRM connector");
+			continue;
+		}
+
+		if (conn->status == DRM_MODE_CONNECTED && drm_conn->connection == DRM_MODE_DISCONNECTED) {
+			wlr_log(WLR_INFO, "Monitor DRM connector %"PRIu32" on %s Changed",
+				event->connector_id, drm->name);
+			// disconnect it so that the client will modeset and rerender when the session is activated again.
+			wlr_output_destroy(&conn->output);
+			if (!conn->crtc) {
+				continue;
+			}
+			// After changing the session, the CRTC ID might have changed, which caused the destroy output commit to fail.
+			drm_plane_finish_surface(conn->crtc->primary);
+			drm_plane_finish_surface(conn->crtc->cursor);
+			drm_fb_clear(&conn->cursor_pending_fb);
+
+			conn->crtc = NULL;
+			conn->cursor_enabled = false;
+		}
+
+		drmModeFreeConnector(drm_conn);
+	}
+}
+
+void restore_drm_connectors_crtc(struct wlr_drm_backend *drm)
+{
+	drmModeRes *res = drmModeGetResources(drm->fd);
+	if (!res) {
+		wlr_log_errno(WLR_ERROR, "Failed to get DRM resources");
+		return;
+	}
+
+	struct wlr_drm_connector *conn;
+	wl_list_for_each(conn, &drm->connectors, link) {
+		drmModeConnector *drm_conn = drmModeGetConnector(drm->fd, conn->id);
+		if (!drm_conn) {
+			wlr_log_errno(WLR_ERROR, "Failed to get DRM connector");
+			continue;
+		}
+		if (conn->status == DRM_MODE_DISCONNECTED && drm_conn->connection == DRM_MODE_CONNECTED) {
+			// To avoid invalid configurations caused by the previous DRM master leaving KMS in an undefined state,
+			// we need to restore our own state carefully. Since the connector/CRTC mapping might have changed,
+			// we should first disable all CRTCs and then re-enable the ones we were using before the VT switch
+			wlr_log(WLR_INFO, "Need disable all crtc!");
+			for (size_t i = 0; i < drm->num_crtcs; i++) {
+				struct wlr_drm_crtc *crtc = &drm->crtcs[i];
+				if (drmModeSetCrtc(drm->fd, crtc->id, 0, 0, 0, NULL, 0, NULL) != 0) {
+					wlr_log_errno(WLR_ERROR, "Failed to disable CRTC %"PRIu32" after VT switch",crtc->id);
+				}
+			}
+			drmModeFreeConnector(drm_conn);
+			drmModeFreeResources(res);
+			return;
+		}
+
+		if (conn->status == DRM_MODE_CONNECTED && drm_conn->connection == DRM_MODE_CONNECTED) {
+			struct wlr_drm_crtc *current_crtc = connector_get_current_crtc(conn, drm_conn);
+			if (conn->crtc != current_crtc) {
+				wlr_log(WLR_INFO, "The %s's CRTC changed when session active!",conn->name);
+				if (current_crtc && drmModeSetCrtc(drm->fd, current_crtc->id,0, 0, 0, NULL, 0, NULL) != 0) {
+					wlr_log(WLR_ERROR, "Failed to close Current Crtc!");
+				}
+			}
+
+		drmModeFreeConnector(drm_conn);
+		}
+	}
+
+	drmModeFreeResources(res);
+}
+
 void scan_drm_connectors(struct wlr_drm_backend *drm,
 		struct wlr_device_hotplug_event *event) {
 	if (event != NULL && event->connector_id != 0) {

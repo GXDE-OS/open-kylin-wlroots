@@ -102,22 +102,8 @@ static void handle_session_active(struct wl_listener *listener, void *data) {
 
 	if (session->active) {
 		wlr_log(WLR_INFO, "DRM fd resumed");
+		restore_drm_connectors_crtc(drm);
 		scan_drm_connectors(drm, NULL);
-
-		// The previous DRM master leaves KMS in an undefined state. We need
-		// to restore out own state, but be careful to avoid invalid
-		// configurations. The connector/CRTC mapping may have changed, so
-		// first disable all CRTCs, then light up the ones we were using
-		// before the VT switch.
-		// TODO: use the atomic API to improve restoration after a VT switch
-		for (size_t i = 0; i < drm->num_crtcs; i++) {
-			struct wlr_drm_crtc *crtc = &drm->crtcs[i];
-
-			if (drmModeSetCrtc(drm->fd, crtc->id, 0, 0, 0, NULL, 0, NULL) != 0) {
-				wlr_log_errno(WLR_ERROR, "Failed to disable CRTC %"PRIu32" after VT switch",
-					crtc->id);
-			}
-		}
 
 		struct wlr_drm_connector *conn;
 		wl_list_for_each(conn, &drm->connectors, link) {
@@ -149,6 +135,9 @@ static void handle_dev_change(struct wl_listener *listener, void *data) {
 	struct wlr_device_change_event *change = data;
 
 	if (!drm->session->active) {
+		if (change->type == WLR_DEVICE_HOTPLUG) {
+			update_drm_connector(drm, &change->hotplug);
+		}
 		return;
 	}
 
