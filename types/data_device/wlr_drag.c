@@ -218,10 +218,13 @@ static uint32_t drag_handle_pointer_button(struct wlr_seat_pointer_grab *grab,
 		if (drag->focus_client && drag->source->current_dnd_action &&
 				drag->source->accepted) {
 			drag_drop(drag, time);
-		} else if (drag->source->impl->dnd_finish) {
-			// This will end the grab and free `drag`
-			wlr_data_source_destroy(drag->source);
-			return 0;
+		} else {
+			wlr_data_source_dnd_drop(drag->source);
+			if (drag->source->impl->dnd_finish) {
+				// This will end the grab and free `drag`
+				wlr_data_source_destroy(drag->source);
+				return 0;
+			}
 		}
 	}
 
