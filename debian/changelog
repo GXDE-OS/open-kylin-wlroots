@@ -1,3 +1,10 @@
+wlroots (0.17.4-ok4.1) nile; urgency=medium
+
+  * Check gbm_bo_get_fd_for_plane at runtime
+  * Add some dnd patch from upstream
+
+ -- Morose <chenlinxiang@kylinos.cn>  Fri, 13 Dec 2024 14:45:44 +0800
+
 wlroots (0.17.4-ok4) nile; urgency=medium
 
   * Fix some bugs about xwayland
