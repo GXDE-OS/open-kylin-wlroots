@@ -1,3 +1,9 @@
+wlroots (0.17.4-ok6) huanghe; urgency=medium
+
+  * Session skip adding duplicate DRM device
+
+ -- Morose <chenlinxiang@kylinos.cn>  Mon, 06 Jan 2025 17:58:45 +0800
+
 wlroots (0.17.4-ok5) huanghe; urgency=medium
 
   * Rebuild for huanghe
