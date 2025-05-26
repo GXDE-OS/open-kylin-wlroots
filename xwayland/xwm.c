@@ -1671,19 +1671,21 @@ static void xwm_handle_focus_in(struct wlr_xwm *xwm,
 		return;
 	}
 
+	// Ignore any out-of-date FocusIn event (older than the last
+	// known WM-initiated focus change) to avoid race conditions.
+	// https://github.com/swaywm/wlroots/issues/2324
+	if (!validate_focus_serial(xwm->last_focus_seq, ev->sequence)) {
+		return;
+	}
+
 	// Do not let X clients change the focus behind the compositor's
 	// back. Reset the focus to the old one if it changed.
 	//
 	// Note: Some applications rely on being able to change focus, for ex. Steam:
 	// https://github.com/swaywm/sway/issues/1865
-	// Because of that, we allow changing focus between surfaces belonging to the
-	// same application. We must be careful to ignore requests that are too old
-	// though, because otherwise it may lead to race conditions:
-	// https://github.com/swaywm/wlroots/issues/2324
 	struct wlr_xwayland_surface *requested_focus = lookup_surface(xwm, ev->event);
-	if (xwm->focus_surface && requested_focus &&
-			requested_focus->pid == xwm->focus_surface->pid &&
-			validate_focus_serial(xwm->last_focus_seq, ev->sequence)) {
+	if (requested_focus && ((xwm->focus_surface && requested_focus->pid == xwm->focus_surface->pid) ||
+		requested_focus->override_redirect)) {
 		xwm_set_focus_window(xwm, requested_focus);
 	} else {
 		xwm_set_focus_window(xwm, xwm->focus_surface);
