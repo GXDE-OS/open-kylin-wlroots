@@ -176,6 +176,9 @@ static void session_signal(struct wl_listener *listener, void *data) {
 	} else {
 		libinput_suspend(backend->libinput_context);
 	}
+
+	int libinput_fd = libinput_get_fd(backend->libinput_context);
+	handle_libinput_readable(libinput_fd, WL_EVENT_READABLE, backend);
 }
 
 static void handle_session_destroy(struct wl_listener *listener, void *data) {
