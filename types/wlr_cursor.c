@@ -529,8 +529,15 @@ static void cursor_output_cursor_update(struct wlr_cursor_output_cursor *output_
 			hotspot_x, hotspot_y);
 	} else if (cur->state->surface != NULL) {
 		struct wlr_surface *surface = cur->state->surface;
+		bool own_texture = false;
 
 		struct wlr_texture *texture = wlr_surface_get_texture(surface);
+		if (texture == NULL && surface->current.buffer != NULL) {
+			struct wlr_renderer *renderer = output->renderer;
+			assert(renderer != NULL);
+			texture = wlr_texture_from_buffer(renderer, surface->current.buffer);
+			own_texture = !!texture;
+		}
 		int32_t hotspot_x = cur->state->surface_hotspot.x;
 		int32_t hotspot_y = cur->state->surface_hotspot.y;
 
@@ -539,7 +546,7 @@ static void cursor_output_cursor_update(struct wlr_cursor_output_cursor *output_
 		int dst_width = surface->current.width;
 		int dst_height = surface->current.height;
 
-		output_cursor_set_texture(output_cursor->output_cursor, texture, false,
+		output_cursor_set_texture(output_cursor->output_cursor, texture, own_texture,
 			&src_box, dst_width, dst_height, surface->current.transform,
 			hotspot_x, hotspot_y);
 
