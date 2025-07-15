@@ -233,7 +233,9 @@ static uint32_t drag_handle_pointer_button(struct wlr_seat_pointer_grab *grab,
 				drag->source->accepted) {
 			drag_drop(drag, time);
 		} else {
-			wlr_data_source_dnd_drop(drag->source);
+			if (drag->focus_client != drag->seat_client) {
+				wlr_data_source_dnd_drop(drag->source);
+			}
 			if (drag->source->impl->dnd_finish) {
 				// This will end the grab and free `drag`
 				wlr_data_source_destroy(drag->source);
