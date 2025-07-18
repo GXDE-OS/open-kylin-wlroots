@@ -31,7 +31,7 @@ void wlr_data_source_send(struct wlr_data_source *source, const char *mime_type,
 
 void wlr_data_source_accept(struct wlr_data_source *source, uint32_t serial,
 		const char *mime_type) {
-	source->accepted = (mime_type != NULL);
+	source->accepted = (mime_type != NULL && *mime_type != '\0');
 	wl_signal_emit_mutable(&source->events.accepted, NULL);
 
 	if (source->impl->accept) {
