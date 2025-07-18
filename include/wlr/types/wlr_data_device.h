@@ -75,6 +75,8 @@ struct wlr_data_source {
 	uint32_t compositor_action;
 
 	struct {
+		struct wl_signal accepted;
+		struct wl_signal dnd_action;
 		struct wl_signal destroy;
 	} events;
 };

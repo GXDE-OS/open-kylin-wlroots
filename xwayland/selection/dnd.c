@@ -190,6 +190,8 @@ int xwm_handle_selection_client_message(struct wlr_xwm *xwm,
 		assert(drag != NULL);
 
 		drag->source->accepted = accepted;
+		wl_signal_emit_mutable(&drag->source->events.accepted, NULL);
+
 		wlr_data_source_dnd_action(drag->source, action);
 
 		wlr_log(WLR_DEBUG, "DND_STATUS window=%" PRIu32 " accepted=%d action=%d",
