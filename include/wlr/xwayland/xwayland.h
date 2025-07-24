@@ -56,6 +56,12 @@ struct wlr_xwayland {
 	void *data;
 };
 
+enum wlr_xwayland_surface_functions {
+	WLR_XWAYLAND_SURFACE_FUNCTIONS_ALL = 0,
+	WLR_XWAYLAND_SURFACE_FUNCTIONS_NO_MINIMIZE = 1,
+	WLR_XWAYLAND_SURFACE_FUNCTIONS_NO_MAXIMIZE = 2,
+};
+
 enum wlr_xwayland_surface_decorations {
 	WLR_XWAYLAND_SURFACE_DECORATIONS_ALL = 0,
 	WLR_XWAYLAND_SURFACE_DECORATIONS_NO_BORDER = 1,
@@ -121,6 +127,7 @@ struct wlr_xwayland_surface {
 	xcb_atom_t *protocols;
 	size_t protocols_len;
 
+	uint32_t functions;
 	uint32_t decorations;
 	xcb_icccm_wm_hints_t *hints;
 	xcb_size_hints_t *size_hints;
@@ -183,6 +190,7 @@ struct wlr_xwayland_surface {
 		struct wl_signal set_window_type;
 		struct wl_signal set_hints;
 		struct wl_signal set_size_hints;
+		struct wl_signal set_functions;
 		struct wl_signal set_decorations;
 		struct wl_signal set_strut_partial;
 		struct wl_signal set_override_redirect;

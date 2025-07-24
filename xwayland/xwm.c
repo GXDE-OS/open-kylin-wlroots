@@ -232,6 +232,7 @@ static struct wlr_xwayland_surface *xwayland_surface_create(
 	wl_signal_init(&surface->events.set_window_type);
 	wl_signal_init(&surface->events.set_hints);
 	wl_signal_init(&surface->events.set_size_hints);
+	wl_signal_init(&surface->events.set_functions);
 	wl_signal_init(&surface->events.set_decorations);
 	wl_signal_init(&surface->events.set_strut_partial);
 	wl_signal_init(&surface->events.set_override_redirect);
@@ -798,9 +799,15 @@ static void read_surface_normal_hints(struct wlr_xwm *xwm,
 }
 
 #define MWM_HINTS_FLAGS_FIELD 0
+#define MWM_HINTS_FUNCTIONS_FIELD 1
 #define MWM_HINTS_DECORATIONS_FIELD 2
 
+#define MWM_HINTS_FUNCTIONS (1 << 0)
 #define MWM_HINTS_DECORATIONS (1 << 1)
+
+#define MWM_FUNC_ALL (1 << 0)
+#define MWM_FUNC_MINIMIZE (1 << 3)
+#define MWM_FUNC_MAXIMIZE (1 << 4)
 
 #define MWM_DECOR_ALL (1 << 0)
 #define MWM_DECOR_BORDER (1 << 1)
@@ -814,6 +821,19 @@ static void read_surface_motif_hints(struct wlr_xwm *xwm,
 	}
 
 	uint32_t *motif_hints = xcb_get_property_value(reply);
+	if (motif_hints[MWM_HINTS_FLAGS_FIELD] & MWM_HINTS_FUNCTIONS) {
+		xsurface->functions = WLR_XWAYLAND_SURFACE_FUNCTIONS_ALL;
+		uint32_t functions = motif_hints[MWM_HINTS_FUNCTIONS_FIELD];
+		bool toggle_value = functions & MWM_FUNC_ALL;
+		if ((functions & MWM_FUNC_MINIMIZE) == toggle_value) {
+			xsurface->functions |= WLR_XWAYLAND_SURFACE_FUNCTIONS_NO_MINIMIZE;
+		}
+		if ((functions & MWM_FUNC_MAXIMIZE) == toggle_value) {
+			xsurface->functions |= WLR_XWAYLAND_SURFACE_FUNCTIONS_NO_MAXIMIZE;
+		}
+		wl_signal_emit_mutable(&xsurface->events.set_functions, NULL);
+	}
+
 	if (motif_hints[MWM_HINTS_FLAGS_FIELD] & MWM_HINTS_DECORATIONS) {
 		xsurface->decorations = WLR_XWAYLAND_SURFACE_DECORATIONS_ALL;
 		uint32_t decorations = motif_hints[MWM_HINTS_DECORATIONS_FIELD];
