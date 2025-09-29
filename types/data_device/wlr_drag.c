@@ -115,6 +115,8 @@ static void drag_set_focus(struct wlr_drag *drag,
 	drag->seat_client_destroy.notify = drag_handle_seat_client_destroy;
 	wl_signal_add(&focus_client->events.destroy, &drag->seat_client_destroy);
 
+	wlr_seat_keyboard_notify_modifiers(drag->seat, &drag->seat->keyboard_state.keyboard->modifiers);
+
 out:
 	wl_signal_emit_mutable(&drag->events.focus, drag);
 }
@@ -354,6 +356,27 @@ static void drag_handle_keyboard_modifiers(struct wlr_seat_keyboard_grab *grab,
 	//struct wlr_keyboard *keyboard = grab->seat->keyboard_state.keyboard;
 	// TODO change the dnd action based on what modifier is pressed on the
 	// keyboard
+	struct wlr_drag *drag = grab->data;
+	struct wlr_seat_client *client = drag->focus_client;
+	if (!client) {
+		return;
+	}
+
+	uint32_t serial = wlr_seat_client_next_serial(client);
+	struct wl_resource *resource;
+	wl_resource_for_each(resource, &client->keyboards) {
+		if (wl_resource_get_user_data(resource) == NULL) {
+			continue;
+		}
+
+		if (modifiers == NULL) {
+			wl_keyboard_send_modifiers(resource, serial, 0, 0, 0, 0);
+		} else {
+			wl_keyboard_send_modifiers(resource, serial,
+				modifiers->depressed, modifiers->latched,
+				modifiers->locked, modifiers->group);
+		}
+	}
 }
 
 static void drag_handle_keyboard_cancel(struct wlr_seat_keyboard_grab *grab) {
