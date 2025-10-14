@@ -115,7 +115,9 @@ static void drag_set_focus(struct wlr_drag *drag,
 	drag->seat_client_destroy.notify = drag_handle_seat_client_destroy;
 	wl_signal_add(&focus_client->events.destroy, &drag->seat_client_destroy);
 
-	wlr_seat_keyboard_notify_modifiers(drag->seat, &drag->seat->keyboard_state.keyboard->modifiers);
+	wlr_seat_keyboard_notify_modifiers(drag->seat,
+		drag->seat->keyboard_state.keyboard ?
+		&drag->seat->keyboard_state.keyboard->modifiers : NULL);
 
 out:
 	wl_signal_emit_mutable(&drag->events.focus, drag);
