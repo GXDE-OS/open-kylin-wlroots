@@ -1709,9 +1709,23 @@ static void xwm_handle_focus_in(struct wlr_xwm *xwm,
 	struct wlr_xwayland_surface *requested_focus = lookup_surface(xwm, ev->event);
 	if (requested_focus && ((xwm->focus_surface && requested_focus->pid == xwm->focus_surface->pid) ||
 		requested_focus->override_redirect)) {
-		xwm_set_focus_window(xwm, requested_focus);
+		if (requested_focus != xwm->focus_surface) {
+			xwm_set_focus_window(xwm, requested_focus);
+		}
 	} else {
 		xwm_set_focus_window(xwm, xwm->focus_surface);
+	}
+}
+
+static void xwm_handle_reparent_notify(struct wlr_xwm *xwm, xcb_reparent_notify_event_t *ev) {
+	if (ev->parent == xwm->screen->root) {
+		xwayland_surface_create(xwm, ev->window, ev->x, ev->y, 10, 10, ev->override_redirect);
+	} else if (ev->parent != xwm->primary_selection.window && ev->parent != xwm->clipboard_selection.window
+		&& ev->parent != xwm->dnd_selection.window) {
+		struct wlr_xwayland_surface *surface = lookup_surface(xwm, ev->window);
+		if (surface) {
+			xwayland_surface_destroy(surface);
+		}
 	}
 }
 
@@ -1828,6 +1842,9 @@ static int x11_event_handler(int fd, uint32_t mask, void *data) {
 			break;
 		case XCB_FOCUS_IN:
 			xwm_handle_focus_in(xwm, (xcb_focus_in_event_t *)event);
+			break;
+		case XCB_REPARENT_NOTIFY:
+			xwm_handle_reparent_notify(xwm, (xcb_reparent_notify_event_t *)event);
 			break;
 		case 0:
 			xwm_handle_xcb_error(xwm, (xcb_value_error_t *)event);
