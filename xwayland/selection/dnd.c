@@ -312,6 +312,11 @@ static void seat_handle_drag_focus(struct wl_listener *listener, void *data) {
 	struct wlr_drag *drag = data;
 	struct wlr_xwm *xwm = wl_container_of(listener, xwm, seat_drag_focus);
 
+	// dnd_leave will be sent when drag destroy if necessary
+	if (drag->cancelling) {
+		return;
+	}
+
 	struct wlr_xwayland_surface *focus = NULL;
 	if (drag->focus != NULL) {
 		focus = wlr_xwayland_surface_try_from_wlr_surface(drag->focus);
