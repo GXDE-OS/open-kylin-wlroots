@@ -222,6 +222,7 @@ static struct wlr_xwayland_surface *xwayland_surface_create(
 	wl_signal_init(&surface->events.request_above);
 	wl_signal_init(&surface->events.request_below);
 	wl_signal_init(&surface->events.request_demands_attention);
+	wl_signal_init(&surface->events.request_modal);
 	wl_signal_init(&surface->events.associate);
 	wl_signal_init(&surface->events.dissociate);
 	wl_signal_init(&surface->events.set_class);
@@ -1412,6 +1413,7 @@ static void xwm_handle_net_wm_state_message(struct wlr_xwm *xwm,
 	bool above = xsurface->above;
 	bool below = xsurface->below;
 	bool demands_attention = xsurface->demands_attention;
+	bool modal = xsurface->modal;
 
 	uint32_t action = client_message->data.data32[0];
 	for (size_t i = 0; i < 2; ++i) {
@@ -1513,6 +1515,10 @@ static void xwm_handle_net_wm_state_message(struct wlr_xwm *xwm,
 
 	if (demands_attention != xsurface->demands_attention) {
 		wl_signal_emit_mutable(&xsurface->events.request_demands_attention, NULL);
+	}
+
+	if (modal != xsurface->modal) {
+		wl_signal_emit_mutable(&xsurface->events.request_modal, NULL);
 	}
 }
 

@@ -179,6 +179,7 @@ struct wlr_xwayland_surface {
 		struct wl_signal request_above;
 		struct wl_signal request_below;
 		struct wl_signal request_demands_attention;
+		struct wl_signal request_modal;
 		struct wl_signal associate;
 		struct wl_signal dissociate;
 
