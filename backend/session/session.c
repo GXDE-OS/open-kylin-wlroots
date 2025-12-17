@@ -508,6 +508,7 @@ ssize_t wlr_session_find_gpus(struct wlr_session *session,
 
 	struct udev_list_entry *entry;
 	size_t i = 0;
+	bool first_is_usb = false;
 
 	udev_list_entry_foreach(entry, udev_enumerate_get_list_entry(en)) {
 		if (i == ret_len) {
@@ -515,6 +516,7 @@ ssize_t wlr_session_find_gpus(struct wlr_session *session,
 		}
 
 		bool is_boot_vga = false;
+		bool is_usb = false;
 
 		const char *path = udev_list_entry_get_name(entry);
 		struct udev_device *dev = udev_device_new_from_syspath(session->udev, path);
@@ -540,22 +542,33 @@ ssize_t wlr_session_find_gpus(struct wlr_session *session,
 			if (id && strcmp(id, "1") == 0) {
 				is_boot_vga = true;
 			}
+		} else {
+			// Detect USB DRM card
+			struct udev_device *usb_dev =
+				udev_device_get_parent_with_subsystem_devtype(dev, "usb", NULL);
+			is_usb = usb_dev != NULL;
 		}
 
 		struct wlr_device *wlr_dev =
 			session_open_if_kms(session, udev_device_get_devnode(dev));
+		udev_device_unref(dev);
 		if (!wlr_dev) {
-			udev_device_unref(dev);
 			continue;
 		}
 
-		udev_device_unref(dev);
+		// Track whether the first GPU is USB
+		if (i == 0) {
+			first_is_usb = is_usb;
+		}
 
 		ret[i] = wlr_dev;
-		if (is_boot_vga) {
+
+		if (is_boot_vga || (first_is_usb && !is_usb)) {
 			struct wlr_device *tmp = ret[0];
 			ret[0] = ret[i];
 			ret[i] = tmp;
+
+			first_is_usb = false;
 		}
 
 		++i;
