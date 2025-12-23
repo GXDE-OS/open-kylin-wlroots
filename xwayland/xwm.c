@@ -1725,12 +1725,9 @@ static void xwm_handle_focus_in(struct wlr_xwm *xwm,
 
 static void xwm_handle_reparent_notify(struct wlr_xwm *xwm, xcb_reparent_notify_event_t *ev) {
 	if (ev->parent == xwm->screen->root) {
-		xwayland_surface_create(xwm, ev->window, ev->x, ev->y, 10, 10, ev->override_redirect);
-	} else if (ev->parent != xwm->primary_selection.window && ev->parent != xwm->clipboard_selection.window
-		&& ev->parent != xwm->dnd_selection.window) {
 		struct wlr_xwayland_surface *surface = lookup_surface(xwm, ev->window);
-		if (surface) {
-			xwayland_surface_destroy(surface);
+		if (!surface) {
+			xwayland_surface_create(xwm, ev->window, ev->x, ev->y, 10, 10, ev->override_redirect);
 		}
 	}
 }
