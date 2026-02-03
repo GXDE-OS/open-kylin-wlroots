@@ -119,6 +119,12 @@ struct wlr_drag {
 	bool started, dropped, cancelling;
 	int32_t grab_touch_id, touch_id; // if WLR_DRAG_GRAB_TOUCH
 
+	// when sending to x11
+	struct {
+		int16_t cache_x, cache_y;
+		bool waiting, cached;
+	} pos;
+
 	struct {
 		struct wl_signal focus;
 		struct wl_signal motion; // struct wlr_drag_motion_event

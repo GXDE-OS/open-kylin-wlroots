@@ -194,6 +194,12 @@ int xwm_handle_selection_client_message(struct wlr_xwm *xwm,
 
 		wlr_data_source_dnd_action(drag->source, action);
 
+		drag->pos.waiting = false;
+		if (drag->pos.cached) {
+			drag->pos.cached = false;
+			xwm_dnd_send_position(xwm, XCB_CURRENT_TIME, drag->pos.cache_x, drag->pos.cache_y);
+		}
+
 		wlr_log(WLR_DEBUG, "DND_STATUS window=%" PRIu32 " accepted=%d action=%d",
 			target_window, accepted, action);
 		return 1;
@@ -285,6 +291,10 @@ static void xwm_set_drag_focus(struct wlr_xwm *xwm, struct wlr_xwayland_surface 
 		return;
 	}
 
+	// clear pos flags
+	xwm->drag->pos.waiting = false;
+	xwm->drag->pos.cached = false;
+
 	if (xwm->drag_focus != NULL) {
 		wlr_data_source_dnd_action(xwm->drag->source,
 			WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE);
@@ -329,10 +339,20 @@ static void seat_handle_drag_motion(struct wl_listener *listener, void *data) {
 	struct wlr_xwm *xwm = wl_container_of(listener, xwm, seat_drag_motion);
 	struct wlr_drag_motion_event *event = data;
 	struct wlr_xwayland_surface *surface = xwm->drag_focus;
+	struct wlr_drag *drag = xwm->drag;
 
 	if (surface == NULL) {
 		return; // No xwayland surface focused
 	}
+
+	if (drag->pos.waiting) {
+		drag->pos.cache_x = (int16_t)event->sx;
+		drag->pos.cache_y = (int16_t)event->sy;
+		drag->pos.cached = true;
+		return;
+	}
+
+	drag->pos.waiting = true;
 
 	xwm_dnd_send_position(xwm, event->time, surface->x + (int16_t)event->sx,
 		surface->y + (int16_t)event->sy);
