@@ -1719,7 +1719,7 @@ static void xwm_handle_focus_in(struct wlr_xwm *xwm,
 	struct wlr_xwayland_surface *requested_focus = lookup_surface(xwm, ev->event);
 	if (requested_focus && ((xwm->focus_surface && requested_focus->pid == xwm->focus_surface->pid) ||
 		requested_focus->override_redirect)) {
-		if (requested_focus != xwm->focus_surface) {
+		if (requested_focus->surface && (requested_focus != xwm->focus_surface)) {
 			xwm_set_focus_window(xwm, requested_focus);
 		}
 	} else {
