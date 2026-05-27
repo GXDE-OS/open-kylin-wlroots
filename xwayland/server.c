@@ -97,6 +97,12 @@ noreturn static void exec_xwayland(struct wlr_xwayland_server *server,
 	server->options.force_xrandr_emulation = false;
 #endif
 
+	char *xauthority_file = getenv("XAUTHORITY");
+	if (xauthority_file && *xauthority_file) {
+	    argv[i++] = "-auth";
+	    argv[i++] = xauthority_file;
+	}
+
 	argv[i++] = NULL;
 
 	assert(i < sizeof(argv) / sizeof(argv[0]));
