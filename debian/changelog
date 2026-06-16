@@ -1,3 +1,9 @@
+wlroots (0.17.5-gxde1) lizhi; urgency=medium
+
+  * Backported several features of upstream mainline V0.20+ features to 0.17.4-ok17.
+
+ -- CharOfString <markus_verify@126.com>  Tue, 16 Jun 2026 23:12:29 +0800
+
 wlroots (0.17.4-ok17) nile; urgency=medium
 
   * Update
