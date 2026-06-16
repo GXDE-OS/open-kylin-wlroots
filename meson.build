@@ -22,6 +22,7 @@ big_endian = target_machine.endian() == 'big'
 
 add_project_arguments([
 	'-DWLR_USE_UNSTABLE',
+	'-DWLR_PRIVATE=',
 	'-DWLR_LITTLE_ENDIAN=@0@'.format(little_endian.to_int()),
 	'-DWLR_BIG_ENDIAN=@0@'.format(big_endian.to_int()),
 ], language: 'c')
@@ -98,6 +99,13 @@ features = {
 internal_features = {
 	'xcb-errors': false,
 	'egl': false,
+}
+
+# Backported for wlr_linux_drm_syncobj_v1
+# 对wlr_linux_drm_syncobj_v1的backport
+internal_features += {
+	'eventfd': cc.has_function('eventfd', prefix: '#include <sys/eventfd.h>'),
+	'linux_sync_file': cc.has_header('linux/sync_file.h'),
 }
 internal_config = configuration_data()
 

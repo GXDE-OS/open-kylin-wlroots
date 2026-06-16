@@ -24,7 +24,45 @@ We have also patched the current, we have patch some of features of Wlroots v0.2
 
 
 
-(WIP ・ 正在施工中)
+### File Added | 新增文件
+> **Note**: `wlr_linux_drm_syncobj_v1.c` is the subset of the upstream's implementation, with additional debugging mechanisms.
+
+> **注意**: `wlr_linux_drm_syncobj_v1.c`是上游实现的子集，在此之上加入了一些调试机制。
+
+
+
+
+| Added file | Purpose |
+| ----- | ----- |
+| `include/wlr/render/drm_syncobj.h` | DRM synchronization timeline's API, which includs timeline creation, importing, exporting, signaling, and waiting. |
+| `include/render/drm_syncobj_merger.h` | Timeline merger that combines multiple inputs into a single output. |
+| `include/wlr/types/wlr_linux_drm_syncobj_v1.h` | Implementation of the `linux-drm-syncobj-v1` Wayland protocol. |
+| `render/drm_syncobj.c` | Core timeline implementation. |
+| `render/drm_syncobj_merger.c` | Merger implementation. |
+| `types/wlr_linux_drm_syncobj_v1.c` | Protocol surface state management. |
+
+
+
+| 新增文件 | 作用 |
+| ----- | ----- |
+| `include/wlr/render/drm_syncobj.h` | DRM同步时间线的API，包括`timeline`的创建、导入、导出、信号与等待 |
+| `include/render/drm_syncobj_merger.h` | 时间线合并器，将多输入合并为单输出 |
+| `include/wlr/types/wlr_linux_drm_syncobj_v1.h` | `linux-drm-syncobj-v1`Wayland协议实现 |
+| `render/drm_syncobj.c` | 时间线核心实现 |
+| `render/drm_syncobj_merger.c` | 合并器实现 |
+| `types/wlr_linux_drm_syncobj_v1.c` | 协议surface state管理 |
+
+
+
+
+### File Modified | 修改文件
+* **`meson.build`**: Adds feature detection for `eventfd` and `linux_sync_file` ・ 添加`eventfd`与`linux_sync_file`的特性检测。
+* **`protocol/meson.build`**: Introduces the `linux-drm-syncobj-v1.xml` protocol ・ 引入`linux-drm-syncobj-v1.xml`协议。
+* **`render/meson.build`**: Builds the newly added render-related files ・ 用于编译新增的渲染相关文件。
+* **`types/meson.build`**: Builds the protocol implementation ・ 用于编译协议实现的相关文件。
+
+
+
 
 
 ## Original README | 原版README
@@ -91,7 +129,7 @@ development tools - or any subset of these features you like, because all of
 them work independently of one another and freely compose with anything you want
 to implement yourself.
 
-wlroots**正确地**实现了种类繁多的Wayland合成器功能，因此您可以专注于编写哪些让您自己的合成器与众不同的特色功能。使用wlroots，您可以享受到高性能的表现、出色的硬件兼容性、对多种Wayland接口的广泛支持与便捷的开发工具 —— 由于他们都是独立实现，您亦可以裁剪出其中任何子集，并且与您自己实现的各种功能自由组合。
+wlroots**正确地**实现了种类繁多的Wayland合成器功能，因此您可以专注于编写哪些让您自己的合成器与众不同的特色功能。使用wlroots，您可以享受到高性能的表现、出色的硬件兼容性、对多种Wayland接口的广泛支持与便捷的开发工具 —— 由于它们都是独立实现，您亦可以裁剪出其中任何子集，并且与您自己实现的各种功能自由组合。
 
 
 
