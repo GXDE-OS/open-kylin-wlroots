@@ -1,3 +1,9 @@
+wlroots (0.17.5-gxde2) lizhi; urgency=medium
+
+  * Ignore libinput switch kinds unsupported by wlroots 0.17.
+
+ -- CharOfString <root@charofstring.cc>  Sun, 06 Sep 2026 17:46:45 -0500
+
 wlroots (0.17.5-gxde1) lizhi; urgency=medium
 
   * Backported several features of upstream mainline V0.20+ features to 0.17.4-ok17.
